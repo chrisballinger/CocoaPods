@@ -56,6 +56,9 @@ module Pod
               libraries = file_accessors.flat_map(&:vendored_libraries).uniq.map(&:basename)
               libraries += pod_targets.select { |pt| pt.should_build? && pt.build_as_library? }.map(&:product_name)
               verify_no_duplicate_names(libraries, aggregate_target.label, 'libraries')
+
+              xcframeworks = file_accessors.flat_map(&:vendored_xcframeworks).uniq.map(&:basename)
+              verify_no_duplicate_names(xcframeworks, aggregate_target.label, 'xcframeworks')
             end
           end
         end

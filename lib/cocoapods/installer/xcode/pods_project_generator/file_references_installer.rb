@@ -46,6 +46,7 @@ module Pod
             add_source_files_references
             add_frameworks_bundles
             add_vendored_libraries
+            add_xcframeworks
             add_resources
             add_developer_files unless sandbox.development_pods.empty?
             link_headers
@@ -111,6 +112,16 @@ module Pod
           def add_vendored_libraries
             UI.message '- Adding libraries' do
               add_file_accessors_paths_to_pods_group(:vendored_libraries, :frameworks)
+            end
+          end
+
+          # Adds the XCFrameworks to the Pods project
+          #
+          # @return [void]
+          #
+          def add_xcframeworks
+            UI.message '- Adding XCFrameworks' do
+              add_file_accessors_paths_to_pods_group(:vendored_xcframeworks, :frameworks)
             end
           end
 

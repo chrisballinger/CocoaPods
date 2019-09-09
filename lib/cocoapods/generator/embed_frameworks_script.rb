@@ -72,6 +72,35 @@ module Pod
           # was originally proposed here: https://lists.samba.org/archive/rsync/2008-February/020158.html
           RSYNC_PROTECT_TMP_FILES=(--filter "P .*.??????")
 
+          platformPrefix() {
+            if  [[ "$1" == 'iphoneos' ]] || [[ "$1" == 'iphonesimulator' ]]; then
+                echo 'ios'
+            elif if  [[ "$1" == 'appletvos' ]] || [[ "$1" == 'appletvos' ]]; then
+                echo 'tvos'
+            elif if  [[ "$1" == 'macosx' ]]; then
+                echo 'macos'
+            elif if  [[ "$1" == 'watchos' ]] || [[ "$1" == 'watchsimulator' ]]; then
+                echo 'watchos'
+            fi
+          }
+        
+          platformSuffix() {
+            if  [[ "$1" == 'iphonesimulator' ]]; then
+                echo '-simulator'
+            fi
+            # TODO: appletvos appletvsimulator iphonesimulator macosx watchos watchsimulator
+          }
+        
+          # Copies a vendored xcframework
+          install_xcframework()
+          {
+            local prefix="$(platformPrefix $PLATFORM_NAME)"
+            local suffix="$(platformSuffix $PLATFORM_NAME)"
+            local basename="$(basename -s .xcframework "$1")"
+            local path="$1/${prefix}-${CURRENT_ARCH}${suffix}/${basename}.framework"
+            install_framework "${path}"
+          }
+
           # Copies and strips a vendored framework
           install_framework()
           {
@@ -210,7 +239,11 @@ module Pod
           next if frameworks_with_dsyms.empty?
           script << %(if [[ "$CONFIGURATION" == "#{config}" ]]; then\n)
           frameworks_with_dsyms.each do |framework_with_dsym|
-            script << %(  install_framework "#{framework_with_dsym.source_path}"\n)
+            if framework_with_dsym.source_path.end_with?(".xcframework")
+              script << %(  install_xcframework "#{framework_with_dsym.source_path}"\n) 
+            else 
+              script << %(  install_framework "#{framework_with_dsym.source_path}"\n) 
+            end
             # Vendored frameworks might have a dSYM file next to them so ensure its copied. Frameworks built from
             # sources will have their dSYM generated and copied by Xcode.
             script << %(  install_dsym "#{framework_with_dsym.dsym_path}"\n) unless framework_with_dsym.dsym_path.nil?

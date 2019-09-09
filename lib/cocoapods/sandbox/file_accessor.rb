@@ -179,6 +179,13 @@ module Pod
         vendored_frameworks - vendored_dynamic_frameworks
       end
 
+      # @return [Array<Pathname>] The paths of the xcframework bundles that come
+      #         shipped with the Pod.
+      #
+      def vendored_xcframeworks
+        paths_for_attribute(:vendored_xcframeworks, true)
+      end
+
       # @param [Array<FileAccessor>] file_accessors
       #        The list of all file accessors to compute.
       #
@@ -186,6 +193,7 @@ module Pod
       #
       def self.all_files(file_accessors)
         files = [
+          file_accessors.map(&:vendored_xcframeworks),
           file_accessors.map(&:vendored_frameworks),
           file_accessors.map(&:vendored_libraries),
           file_accessors.map(&:resource_bundle_files),
@@ -256,7 +264,7 @@ module Pod
       #         that come shipped with the Pod.
       #
       def vendored_dynamic_artifacts
-        vendored_dynamic_libraries + vendored_dynamic_frameworks
+        vendored_dynamic_libraries + vendored_dynamic_frameworks + vendored_xcframeworks
       end
 
       # @return [Array<Pathname>] The paths of the static binary artifacts

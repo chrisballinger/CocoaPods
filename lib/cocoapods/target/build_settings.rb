@@ -629,9 +629,18 @@ module Pod
         end
 
         # @return [Array<String>]
+        define_build_settings_method :vendored_xcframework_search_paths, :memoized => true do
+          file_accessors.flat_map(&:vendored_xcframeworks).map { |f| 
+            base = File.join '${PODS_ROOT}', f.dirname.relative_path_from(target.sandbox.root) 
+            "#{base}/**"
+          }
+        end
+
+        # @return [Array<String>]
         define_build_settings_method :framework_search_paths_to_import, :memoized => true do
           paths = framework_search_paths_to_import_developer_frameworks(consumer_frameworks)
           paths.concat vendored_framework_search_paths
+          paths.concat vendored_xcframework_search_paths
           return paths unless target.build_as_framework? && target.should_build?
 
           paths + [target.configuration_build_dir(CONFIGURATION_BUILD_DIR_VARIABLE)]
