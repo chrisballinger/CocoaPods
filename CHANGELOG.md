@@ -8,6 +8,15 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
 
 ##### Enhancements
 
+* Support Swift version variants.  
+  [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
+  [#9230](https://github.com/CocoaPods/CocoaPods/pull/9230)
+
+* Configure dependencies per configuration.  
+  [Samuel Giddins](https://github.com/segiddins)
+  [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
+  [#9149](https://github.com/CocoaPods/CocoaPods/pull/9149)
+
 * Include Podfile Plugin changes for incremental installation.  
   [Sebastian Shanus](https://github.com/sebastianv1)
   [#9147](https://github.com/CocoaPods/CocoaPods/pull/9147)
@@ -22,10 +31,72 @@ To install release candidates run `[sudo] gem install cocoapods --pre`
 
 ##### Bug Fixes
 
+* Fix incremental installation with plugins that include arguments with different ordering.  
+  [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
+  [#9170](https://github.com/CocoaPods/CocoaPods/pull/9170)
+
 * Move custom `Copy Headers` script phase for header mappings before `Compile Sources`.  
   [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
   [#9131](https://github.com/CocoaPods/CocoaPods/pull/9131)
 
+
+## 1.8.4 (2019-10-16)
+
+##### Enhancements
+
+* None.  
+
+##### Bug Fixes
+
+* Do not crash if the repos dir is not setup.  
+  [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
+  [#9216](https://github.com/CocoaPods/CocoaPods/issues/9216)
+
+## 1.8.3 (2019-10-04)
+
+##### Enhancements
+
+* None.  
+
+##### Bug Fixes
+
+* Fix crash when running on mounted filesystems  
+  [Paul Beusterien](https://github.com/paulb777)
+  [#9200](https://github.com/CocoaPods/CocoaPods/pull/9200)
+
+
+## 1.8.1 (2019-09-27)
+
+##### Enhancements
+
+* None.  
+
+##### Bug Fixes
+
+* None.  
+
+
+## 1.8.0 (2019-09-23)
+
+##### Enhancements
+
+* None.  
+
+##### Bug Fixes
+
+* Include dependent vendored frameworks in linker flags  
+  [Alex Coomans](https://github.com/drcapulet)
+  [#9045](https://github.com/CocoaPods/CocoaPods/pull/9045)
+
+* Correctly set deployment target for non library specs even if the root spec does not specify one.  
+  [Dimitris Koutsogiorgas](https://github.com/dnkoutso)
+  [#9153](https://github.com/CocoaPods/CocoaPods/pull/9153)
+
+* Make `APPLICATION_EXTENSION_API_ONLY` build setting not break when performing a cached incremental install.  
+  [Igor Makarov](https://github.com/igor-makarov)
+  [#8967](https://github.com/CocoaPods/CocoaPods/issues/8967)
+  [#9141](https://github.com/CocoaPods/CocoaPods/issues/9141)
+  [#9142](https://github.com/CocoaPods/CocoaPods/pull/9142)
 
 ## 1.8.0.beta.2 (2019-08-27)
 

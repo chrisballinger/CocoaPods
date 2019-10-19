@@ -67,9 +67,7 @@ module Pod
                                                                          @grapefruits_app_spec], BuildType.static_library,
                                                                         user_build_configurations, [], @ios_platform,
                                                                         [@ios_target_definition], 'iOS')
-            @grapefruits_ios_pod_target.app_dependent_targets_by_spec_name = { @coconut_test_spec.name => [@monkey_pod_target] }
-
-            @grapefruits_ios_pod_target.app_dependent_targets_by_spec_name[@grapefruits_ios_pod_target.app_specs.first.name] = [@banana_ios_pod_target]
+            @grapefruits_ios_pod_target.app_dependent_targets_by_spec_name = { @grapefruits_app_spec.name => [@banana_ios_pod_target] }
 
             ios_pod_targets = [@banana_ios_pod_target, @monkey_ios_pod_target, @coconut_ios_pod_target,
                                @orangeframework_pod_target, @watermelon_ios_pod_target, @grapefruits_ios_pod_target]
@@ -537,60 +535,6 @@ module Pod
             }
           end
 
-          it 'configures APPLICATION_EXTENSION_API_ONLY for pod targets of an aggregate target' do
-            user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :app_extension)
-            @ios_target.stubs(:user_targets).returns([user_target])
-            pod_generator_result = @generator.generate!
-            projects_by_pod_targets = pod_generator_result.projects_by_pod_targets
-            pod_generator_result.project.targets.find { |t| t.name == 'Pods-SampleApp-iOS' }.dependencies.each do |dependency|
-              project = projects_by_pod_targets.find { |_, pod_targets| pod_targets.find { |t| t.label == dependency.name } }.first
-              build_settings = project.targets.find { |t| t.name == dependency.name }.build_configurations.map(&:build_settings)
-              build_settings.each do |build_setting|
-                build_setting['APPLICATION_EXTENSION_API_ONLY'].should == 'YES'
-              end
-            end
-          end
-
-          it 'configures APPLICATION_EXTENSION_API_ONLY for app extension targets' do
-            user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :app_extension)
-            @ios_target.stubs(:user_targets).returns([user_target])
-            pod_generator_result = @generator.generate!
-            build_settings = pod_generator_result.project.targets.find { |t| t.name == 'Pods-SampleApp-iOS' }.build_configurations.map(&:build_settings)
-            build_settings.each do |build_setting|
-              build_setting['APPLICATION_EXTENSION_API_ONLY'].should == 'YES'
-            end
-          end
-
-          it 'configures APPLICATION_EXTENSION_API_ONLY for watch2 extension targets' do
-            user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :watch2_extension)
-            @ios_target.stubs(:user_targets).returns([user_target])
-            pod_generator_result = @generator.generate!
-            build_settings = pod_generator_result.project.targets.find { |t| t.name == 'Pods-SampleApp-iOS' }.build_configurations.map(&:build_settings)
-            build_settings.each do |build_setting|
-              build_setting['APPLICATION_EXTENSION_API_ONLY'].should == 'YES'
-            end
-          end
-
-          it 'configures APPLICATION_EXTENSION_API_ONLY for tvOS extension targets' do
-            user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :tv_extension)
-            @ios_target.stubs(:user_targets).returns([user_target])
-            pod_generator_result = @generator.generate!
-            build_settings = pod_generator_result.project.targets.find { |t| t.name == 'Pods-SampleApp-iOS' }.build_configurations.map(&:build_settings)
-            build_settings.each do |build_setting|
-              build_setting['APPLICATION_EXTENSION_API_ONLY'].should == 'YES'
-            end
-          end
-
-          it 'configures APPLICATION_EXTENSION_API_ONLY for Messages extension targets' do
-            user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :messages_extension)
-            @ios_target.stubs(:user_targets).returns([user_target])
-            pod_generator_result = @generator.generate!
-            build_settings = pod_generator_result.project.targets.find { |t| t.name == 'Pods-SampleApp-iOS' }.build_configurations.map(&:build_settings)
-            build_settings.each do |build_setting|
-              build_setting['APPLICATION_EXTENSION_API_ONLY'].should == 'YES'
-            end
-          end
-
           it "uses the user project's object version for the all projects" do
             tmp_directory = Pathname(Dir.tmpdir) + 'CocoaPods'
             FileUtils.mkdir_p(tmp_directory)
@@ -598,7 +542,6 @@ module Pod
             proj.save
 
             user_target = stub('SampleApp-iOS-User-Target', :symbol_type => :application)
-            user_target.expects(:common_resolved_build_setting).with('APPLICATION_EXTENSION_API_ONLY').returns('NO')
 
             target = AggregateTarget.new(config.sandbox, BuildType.static_library,
                                          { 'App Store' => :release, 'Debug' => :debug, 'Release' => :release, 'Test' => :debug },

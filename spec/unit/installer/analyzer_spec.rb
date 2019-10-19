@@ -1,7 +1,7 @@
 require File.expand_path('../../../spec_helper', __FILE__)
 
 module Pod
-  describe Installer::Analyzer do
+  describe Installer::Analyzer do # rubocop:disable Metrics/BlockLength
     describe 'Analysis' do
       before do
         repos = [Source.new(fixture('spec-repos/test_repo')), TrunkSource.new(fixture('spec-repos/trunk'))]
@@ -371,7 +371,7 @@ module Pod
           end
 
           analyze.should.raise(Informative).
-            message.should.include 'b (1.0) depends upon `a/Tests (1.0)`, which is a `test` spec.'
+            message.should.include '`b (1.0)` depends upon `a/Tests (1.0)`, which is a `test` spec.'
 
           pod_b = Pod::Spec.new do |s|
             s.name = 'b'
@@ -382,7 +382,7 @@ module Pod
             s.app_spec 'App'
           end
           analyze.should.raise(Informative).
-            message.should.include 'b/Tests (1.0) depends upon `b/App (1.0)`, which is a `app` spec'
+            message.should.include '`b/Tests (1.0)` depends upon `b/App (1.0)`, which is a `app` spec'
         end
 
         describe 'with deduplicate targets as true' do
@@ -2029,6 +2029,149 @@ module Pod
             analyzer.analyze
           end.message.should.match /Sample Extensions Project \(false\) and Today Extension \(true\) do not both set use_frameworks!\./
         end
+
+        describe 'APPLICATION_EXTENSION_API_ONLY' do
+          it 'configures APPLICATION_EXTENSION_API_ONLY for app extension targets' do
+            @podfile.use_frameworks!
+            analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+            result = analyzer.analyze
+
+            result.targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['Pods-Sample Extensions Project', false], ['Pods-Today Extension', true]]
+            result.pod_targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['matryoshka-Bar', true], ['matryoshka-Bar-Foo', false], ['JSONKit', false], ['monkey', true]]
+          end
+
+          it 'configures APPLICATION_EXTENSION_API_ONLY for watch app extension targets' do
+            @user_project = Xcodeproj::Project.open(SpecHelper.create_sample_app_copy_from_fixture('Sample Extensions Project'))
+            targets = @user_project.targets
+            targets.delete(targets.find('Sample Extensions Project').first)
+            extension_target = targets.find('Today Extension').first
+            extension_target.product_type = 'com.apple.product-type.watchkit2-extension'
+            extension_target.name = 'watchOS Extension Target'
+            extension_target.symbol_type.should == :watch2_extension
+            @user_project.save
+            project_path = @user_project.path
+            @podfile = Pod::Podfile.new do
+              source SpecHelper.test_repo_url
+              platform :watchos, '2.0'
+              project project_path
+
+              target 'watchOS Extension Target' do
+                use_frameworks!
+                pod 'monkey'
+              end
+            end
+
+            @podfile.use_frameworks!
+            analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+            result = analyzer.analyze
+
+            result.targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['Pods-watchOS Extension Target', true]]
+            result.pod_targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['monkey', true]]
+          end
+
+          it 'configures APPLICATION_EXTENSION_API_ONLY for TV app extension targets' do
+            @user_project = Xcodeproj::Project.open(SpecHelper.create_sample_app_copy_from_fixture('Sample Extensions Project'))
+            targets = @user_project.targets
+            targets.delete(targets.find('Sample Extensions Project').first)
+            extension_target = targets.find('Today Extension').first
+            extension_target.product_type = 'com.apple.product-type.tv-app-extension'
+            extension_target.name = 'tvOS Extension Target'
+            extension_target.symbol_type.should == :tv_extension
+            @user_project.save
+            project_path = @user_project.path
+            @podfile = Pod::Podfile.new do
+              source SpecHelper.test_repo_url
+              platform :tvos, '9.0'
+              project project_path
+
+              target 'tvOS Extension Target' do
+                use_frameworks!
+                pod 'monkey'
+              end
+            end
+
+            @podfile.use_frameworks!
+            analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+            result = analyzer.analyze
+
+            result.targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['Pods-tvOS Extension Target', true]]
+            result.pod_targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['monkey', true]]
+          end
+
+          it 'configures APPLICATION_EXTENSION_API_ONLY for messages extension targets' do
+            @user_project = Xcodeproj::Project.open(SpecHelper.create_sample_app_copy_from_fixture('Sample Extensions Project'))
+            targets = @user_project.targets
+            app_target = targets.find { |t| t.name == 'Sample Extensions Project' }
+            app_target.product_type = 'com.apple.product-type.application.messages'
+            extension_target = targets.find { |t| t.name == 'Today Extension' }
+            extension_target.product_type = 'com.apple.product-type.app-extension.messages'
+            extension_target.name = 'Messages Extension Target'
+            extension_target.symbol_type.should == :messages_extension
+            @user_project.save
+            project_path = @user_project.path
+            @podfile = Pod::Podfile.new do
+              source SpecHelper.test_repo_url
+              platform :ios, '8.0'
+              project project_path
+
+              target 'Sample Extensions Project' do
+                pod 'JSONKit', '1.4'
+              end
+
+              target 'Messages Extension Target' do
+                use_frameworks!
+                pod 'monkey'
+              end
+            end
+
+            @podfile.use_frameworks!
+            analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+            result = analyzer.analyze
+
+            result.targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['Pods-Sample Extensions Project', false], ['Pods-Messages Extension Target', true]]
+            result.pod_targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['JSONKit', false], ['monkey', true]]
+          end
+
+          it 'configures APPLICATION_EXTENSION_API_ONLY when build setting is set in user target' do
+            @user_project = Xcodeproj::Project.open(SpecHelper.create_sample_app_copy_from_fixture('Sample Extensions Project'))
+            targets = @user_project.targets
+            app_target = targets.find { |t| t.name == 'Sample Extensions Project' }
+            app_target.build_configurations.each { |c| c.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES' }
+            @user_project.save
+            project_path = @user_project.path
+            @podfile = Pod::Podfile.new do
+              source SpecHelper.test_repo_url
+              platform :ios, '8.0'
+              project project_path
+
+              target 'Sample Extensions Project' do
+                pod 'JSONKit', '1.4'
+              end
+
+              target 'Today Extension' do
+                use_frameworks!
+                pod 'monkey'
+              end
+            end
+
+            @podfile.use_frameworks!
+            analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+            result = analyzer.analyze
+
+            result.targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['Pods-Sample Extensions Project', true], ['Pods-Today Extension', true]]
+            result.pod_targets.map { |t| [t.name, t.application_extension_api_only] }.
+              should == [['JSONKit', true], ['monkey', true]]
+          end
+        end
       end
 
       #-------------------------------------------------------------------------#
@@ -2153,6 +2296,60 @@ module Pod
 
         @analyzer.send(:validate_podfile!)
         UI.warnings.should == "The Podfile does not contain any dependencies.\n"
+      end
+    end
+
+    describe 'swift version' do
+      before do
+        @banana_spec = fixture_spec('banana-lib/BananaLib.podspec')
+        @podfile = Podfile.new
+        @analyzer = Pod::Installer::Analyzer.new(config.sandbox, @podfile)
+      end
+
+      it 'returns the swift version with the given requirements from the target definition' do
+        target_definition = fixture_target_definition('App')
+        target_definition.store_swift_version_requirements('>= 4.0')
+        @banana_spec.swift_versions = ['3.0', '4.0']
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition]).should == '4.0'
+      end
+
+      it 'returns the swift version with the given requirements from all target definitions' do
+        target_definition_one = fixture_target_definition('App1')
+        target_definition_one.store_swift_version_requirements('>= 4.0')
+        target_definition_two = fixture_target_definition('App2')
+        target_definition_two.store_swift_version_requirements('= 4.2')
+        @banana_spec.swift_versions = ['3.0', '4.0', '4.2']
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition_one, target_definition_two]).should == '4.2'
+      end
+
+      it 'returns an empty swift version if none of the requirements match' do
+        target_definition_one = fixture_target_definition('App1')
+        target_definition_one.store_swift_version_requirements('>= 4.0')
+        target_definition_two = fixture_target_definition('App2')
+        target_definition_two.store_swift_version_requirements('= 4.2')
+        @banana_spec.swift_versions = ['3.0', '4.0']
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition_one, target_definition_two]).should == ''
+      end
+
+      it 'uses the swift version defined in the specification' do
+        @banana_spec.swift_versions = ['3.0']
+        target_definition = fixture_target_definition('App1')
+        target_definition.swift_version = '2.3'
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition]).should == '3.0'
+      end
+
+      it 'uses the max swift version defined in the specification' do
+        @banana_spec.swift_versions = ['3.0', '4.0']
+        target_definition = fixture_target_definition('App1')
+        target_definition.swift_version = '2.3'
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition]).should == '4.0'
+      end
+
+      it 'uses the swift version defined by the target definitions if no swift version is specified in the spec' do
+        @banana_spec.swift_versions = []
+        target_definition = fixture_target_definition('App1')
+        target_definition.swift_version = '2.3'
+        @analyzer.send(:determine_swift_version, @banana_spec, [target_definition]).should == '2.3'
       end
     end
 

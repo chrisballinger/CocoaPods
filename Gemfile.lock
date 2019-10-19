@@ -7,13 +7,13 @@ GIT
 
 GIT
   remote: https://github.com/CocoaPods/Core.git
-  revision: 7fd3bb0c34d70e825aee39473046cb9135152214
+  revision: 5c7c11df7b4d1626292f525e747fd2732666f99d
   branch: master
   specs:
-    cocoapods-core (1.8.0.beta.2)
+    cocoapods-core (1.8.4)
       activesupport (>= 4.0.2, < 6)
       algoliasearch (~> 1.0)
-      concurrent-ruby (~> 1.0)
+      concurrent-ruby (~> 1.1)
       fuzzy_match (~> 2.0.4)
       nap (~> 1.0)
 
@@ -33,10 +33,10 @@ GIT
 
 GIT
   remote: https://github.com/CocoaPods/Xcodeproj.git
-  revision: 602c802125b69199ccb06094974a569a98e734c3
+  revision: 1749a226234f03289d27fe96682591fc0d708535
   branch: master
   specs:
-    xcodeproj (1.12.0)
+    xcodeproj (1.13.0)
       CFPropertyList (>= 2.3.3, < 4.0)
       atomos (~> 0.1.3)
       claide (>= 1.0.2, < 2.0)
@@ -81,10 +81,10 @@ GIT
 
 GIT
   remote: https://github.com/CocoaPods/cocoapods-trunk.git
-  revision: 9ad16cb8f71b05d06eac29a541daeac7bc2c672e
+  revision: 67959306c053bc77c73388865a5ac4de22574d96
   branch: master
   specs:
-    cocoapods-trunk (1.4.0)
+    cocoapods-trunk (1.4.1)
       nap (>= 0.8, < 2.0)
       netrc (~> 0.11)
 
@@ -111,10 +111,10 @@ GIT
 PATH
   remote: .
   specs:
-    cocoapods (1.8.0.beta.2)
+    cocoapods (1.8.4)
       activesupport (>= 4.0.2, < 5)
       claide (>= 1.0.2, < 2.0)
-      cocoapods-core (= 1.8.0.beta.2)
+      cocoapods-core (= 1.8.4)
       cocoapods-deintegrate (>= 1.0.3, < 2.0)
       cocoapods-downloader (>= 1.2.2, < 2.0)
       cocoapods-plugins (>= 1.0.0, < 2.0)
@@ -142,7 +142,7 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.5.1)
       public_suffix (~> 2.0, >= 2.0.2)
-    algoliasearch (1.26.1)
+    algoliasearch (1.27.1)
       httpclient (~> 2.8, >= 2.8.3)
       json (>= 1.5.1)
     ast (2.4.0)
@@ -210,7 +210,7 @@ GEM
       rb-kqueue (>= 0.2)
     metaclass (0.0.4)
     method_source (0.8.2)
-    minitest (5.11.3)
+    minitest (5.12.0)
     mocha (1.2.1)
       metaclass (~> 0.0.1)
     mocha-on-bacon (0.2.3)
@@ -297,6 +297,7 @@ DEPENDENCIES
   inch_by_inch
   json!
   kicker
+  minitest (= 5.12.0)
   mocha
   mocha-on-bacon
   molinillo!
